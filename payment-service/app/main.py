@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from app.database import engine
 from app.models import Base
-from app.api.routers.order import router as order_router
+from app.api.routers.payment import router as payment_router
 
 
 
@@ -17,5 +17,5 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(order_router, tags=['order'])
+app.include_router(payment_router, tags=['payment'])
 
