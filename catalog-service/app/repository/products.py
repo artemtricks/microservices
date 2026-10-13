@@ -16,9 +16,7 @@ class ProductsRepository:
         return self.db.get(Product, product_id)
     
     def create(self, payload: ProductCreateSchema) -> Product | None:
-        print(payload)
         new_product = Product(name=payload.name, category=payload.category, price=payload.price, description=payload.description, image=payload.image)
-        print(new_product)
         self.db.add(new_product)
         return new_product
 
