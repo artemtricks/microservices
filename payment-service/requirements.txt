@@ -1,5 +1,6 @@
 fastapi
 sqlalchemy
-psycopg2-binary
+asyncpg
+aio-pika
 uvicorn
 pydantic-settings
