@@ -1,0 +1,9 @@
+fastapi
+sqlalchemy[asyncio]
+uvicorn[standard]
+psycopg2-binary
+asyncpg
+aio-pika
+pydantic-settings
+ruff
+httpx
