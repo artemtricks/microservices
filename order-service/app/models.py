@@ -1,9 +1,8 @@
-
 from datetime import datetime
 from uuid import uuid4
-from sqlalchemy import DateTime, func, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped,  mapped_column, relationship
 
+from sqlalchemy import DateTime, ForeignKey, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -11,27 +10,23 @@ class Base(DeclarativeBase):
 
 
 class Order(Base):
-    __tablename__ = 'order'
+    __tablename__ = "order"
 
     user_id: Mapped[str]
-    status: Mapped[str] = mapped_column(default='created')
+    status: Mapped[str] = mapped_column(default="created")
     total_amount: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    items: Mapped[list[OrderItem]] = relationship('OrderItem', back_populates='order')
-
+    items: Mapped[list[OrderItem]] = relationship("OrderItem", back_populates="order")  # noqa: F821
 
 
 class OrderItem(Base):
-    __tablename__ = 'order_items'
+    __tablename__ = "order_items"
 
-    order_id: Mapped[str] = mapped_column(ForeignKey('order.id'), index=True)
+    order_id: Mapped[str] = mapped_column(ForeignKey("order.id"), index=True)
     product_id: Mapped[str]
     product_name: Mapped[str]
     quantity: Mapped[int]
     unit_price: Mapped[int]
-    order: Mapped[Order] = relationship('Order', back_populates='items')
-
+    order: Mapped[Order] = relationship("Order", back_populates="items")

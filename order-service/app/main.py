@@ -1,11 +1,9 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from app.api.routers.order import router as order_router
 from app.database import engine
 from app.models import Base
-from app.api.routers.order import router as order_router
-
-
+from fastapi import FastAPI
 
 
 @asynccontextmanager
@@ -14,8 +12,6 @@ async def lifespan(_: FastAPI):
     yield
 
 
-
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(order_router, tags=['order'])
-
+app.include_router(order_router, tags=["order"])

@@ -6,5 +6,5 @@ class CatalogClient:
         self.base_url = base_url
 
     def get_product(self, product_id: str) -> dict:
-        response = httpx.get(f'{self.base_url}/products/{product_id}')
+        response = httpx.get(f"{self.base_url}/{product_id}")
         return response.json()
