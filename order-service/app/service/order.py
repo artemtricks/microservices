@@ -1,15 +1,18 @@
+from app.clients import CatalogClient, PaymentClient
 from app.repository.order import CatalogRepository
 from app.schemas import OrderCreateSchema, OrderReadSchema
-from clients.catalog_client import CatalogClient
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 
 class OrderService:
-    def __init__(self, db: Session, catalog_client: CatalogClient) -> None:
+    def __init__(
+        self, db: Session, catalog_client: CatalogClient, payment_client: PaymentClient
+    ) -> None:
         self.db = db
         self.catalog_repository = CatalogRepository(db)
         self.catalog_client = catalog_client
+        self.payment_client = payment_client
 
     def get(self, order_id: str) -> OrderReadSchema:
         order_orm = self.catalog_repository.get_one(order_id)
@@ -31,9 +34,15 @@ class OrderService:
                     "unit_price": product["price"],
                 }
             )
-        total_amount = [product["unit_price"] for product in products]
+        total_amount = sum(
+            product["unit_price"] * product["quantity"] for product in products
+        )
         order_orm = self.catalog_repository.create(
             payload=payload, total_amount=total_amount, products=products
         )
         self.db.commit()
+        self.payment_client.create_payment(
+            order_id=order_orm.id, user_id=order_orm.user_id, amount=total_amount
+        )
+
         return OrderReadSchema.model_validate(order_orm)

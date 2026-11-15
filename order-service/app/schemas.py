@@ -31,3 +31,9 @@ class OrderReadSchema(BaseModel):
     total_amount: str
     status: str
     items: list[OrderItemReadSchema]
+
+
+class PaymentCreateSchema(BaseModel):
+    order_id: str
+    user_id: str
+    amount: int
