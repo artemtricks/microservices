@@ -28,7 +28,7 @@ class OrderReadSchema(BaseModel):
 
     id: str
     user_id: str
-    total_amount: str
+    total_amount: int
     status: str
     items: list[OrderItemReadSchema]
 

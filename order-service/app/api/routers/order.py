@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends
 router = APIRouter()
 
 
+@router.get("/orders")
+def get_all_orders(
+    order_service: OrderService = Depends(get_order_service),
+) -> list[OrderReadSchema]:
+    return order_service.get_all()
+
+
 @router.get("/order/{order_id}")
 def get_order(
     order_id: str, order_service: OrderService = Depends(get_order_service)

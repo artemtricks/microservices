@@ -6,12 +6,10 @@ class PaymentReadSchema(BaseModel):
 
     id: str
     order_id: str
-    user_id: str
     amount: int
     status: str
 
 
 class PaymentCreateSchema(BaseModel):
     order_id: str
-    user_id: str
     amount: int

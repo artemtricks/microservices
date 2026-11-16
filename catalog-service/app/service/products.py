@@ -10,7 +10,7 @@ class ProductsService:
         self.db = db
         self.product_repository = ProductsRepository(db)
 
-    def list_products(self) -> list[ProductReadeSchema]:
+    def get_all_products(self) -> list[ProductReadeSchema]:
         products_orm = self.product_repository.get_all()
         products_read = [
             ProductReadeSchema.model_validate(product) for product in products_orm

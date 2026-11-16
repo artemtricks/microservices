@@ -6,6 +6,13 @@ from fastapi import APIRouter, Depends, Request
 router = APIRouter()
 
 
+@router.get("/payments")
+async def get_all_payments(
+    payment_service: PaymentService = Depends(get_payment_service),
+) -> list[PaymentReadSchema]:
+    return await payment_service.get_all()
+
+
 @router.get("/payment/{payment_id}")
 async def get_payment(
     payment_id: str, payment_service: PaymentService = Depends(get_payment_service)
@@ -23,7 +30,6 @@ async def create_payment(
     return await payment_service.complete_payment(
         payment=payment,
         exchange=request.app.state.payment_exchange,
-        user_id=payload.user_id,
         amount=payload.amount,
         order_id=payload.order_id,
     )

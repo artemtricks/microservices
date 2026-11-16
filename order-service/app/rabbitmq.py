@@ -20,6 +20,7 @@ async def handle_payment_events(message: AbstractIncomingMessage):
         event = json.loads(message.body.decode("utf-8"))
         with SessionLocal() as session:
             order = session.get(Order, event["order_id"])
+            print(f"[RABBITMQ RECEIVE] {order}")
             if order is not None:
                 order.status = "paid"
             session.commit()
@@ -29,5 +30,7 @@ async def start_payment_consume(connection: AbstractConnection):
     channel = await connection.channel()
     payment_exchange = await channel.declare_exchange(settings.payment_exchange_name)
     payment_queue = await channel.declare_queue(settings.payment_queue_name)
-    await payment_queue.bind(payment_exchange)
+    await payment_queue.bind(
+        payment_exchange, routing_key=settings.payment_succeeded_routing_key
+    )
     await payment_queue.consume(handle_payment_events)

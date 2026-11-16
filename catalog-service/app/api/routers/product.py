@@ -11,7 +11,7 @@ router = APIRouter()
 def get_products(
     product_service: ProductsService = Depends(get_product_service),
 ) -> list[ProductReadSchema]:
-    return product_service.list_products()
+    return product_service.get_all_products()
 
 
 @router.post("/products")

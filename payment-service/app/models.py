@@ -14,7 +14,7 @@ class PaymentOrm(Base):
 
     order_id: Mapped[str]
     status: Mapped[str]
-    amount: Mapped[str]
+    amount: Mapped[int]
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

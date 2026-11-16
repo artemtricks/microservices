@@ -7,6 +7,9 @@ class CatalogRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def get_all(self) -> list[Order]:
+        return self.db.query(Order).all()
+
     def get_one(self, order_id: str) -> Order | None:
         return self.db.get(Order, order_id)
 

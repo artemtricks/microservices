@@ -14,8 +14,10 @@ def get_paymnt_client() -> PaymentClient:
     return PaymentClient(settings.payment_service_url)
 
 
-def get_order_service(db: Session = Depends(get_db)):
+def get_order_service(
+    db: Session = Depends(get_db),
+    catalog_client: CatalogClient = Depends(get_catalog_client),
+    payment_client: PaymentClient = Depends(get_paymnt_client),
+):
     """Функция для инъекции зависимости OrderService"""
-    catalog_client: CatalogClient = Depends(get_catalog_client)
-    payment_client: PaymentClient = Depends(get_paymnt_client)
     return OrderService(db, catalog_client, payment_client)

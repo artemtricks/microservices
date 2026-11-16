@@ -14,6 +14,11 @@ class OrderService:
         self.catalog_client = catalog_client
         self.payment_client = payment_client
 
+    def get_all(self) -> list[OrderReadSchema]:
+        orders_orm = self.catalog_repository.get_all()
+        orders_read = [OrderReadSchema.model_validate(order) for order in orders_orm]
+        return orders_read
+
     def get(self, order_id: str) -> OrderReadSchema:
         order_orm = self.catalog_repository.get_one(order_id)
         if not order_orm:

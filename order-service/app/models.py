@@ -14,7 +14,7 @@ class Order(Base):
 
     user_id: Mapped[str]
     status: Mapped[str] = mapped_column(default="created")
-    total_amount: Mapped[str]
+    total_amount: Mapped[int]
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

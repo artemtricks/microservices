@@ -7,5 +7,5 @@ class PaymentClient:
 
     def create_payment(self, order_id: str, user_id: str, amount: int) -> dict:
         json_data = {"order_id": order_id, "user_id": user_id, "amount": amount}
-        response = httpx.post(f"{self.base_url}/payments", json=json_data)
+        response = httpx.post(f"{self.base_url}/payment", json=json_data)
         return response.json()
