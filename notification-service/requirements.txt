@@ -1,0 +1,7 @@
+fastapi
+
+asyncpg
+aio - pika
+uvicorn
+pydantic - settings
+sqlalchemy[asyncio]
