@@ -1,7 +1,9 @@
 fastapi
+sqlalchemy[asyncio]
+uvicorn[standard]
 
 asyncpg
-aio - pika
-uvicorn
-pydantic - settings
-sqlalchemy[asyncio]
+aio-pika
+pydantic-settings
+ruff
+httpx

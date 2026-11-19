@@ -20,10 +20,10 @@ async def lifespan(app: FastAPI):
         session_factory = async_sessionmaker(
             engine, expire_on_commit=False, autoflush=False
         )
-        app.state.notification_sevice = NotificationService(
+        app.state.notification_service = NotificationService(
             session_factory=session_factory
         )
-        await start_order_paid_consume(connection, app.state.notification_sevice)
+        await start_order_paid_consume(connection, app.state.notification_service)
         yield
         await engine.dispose()
 

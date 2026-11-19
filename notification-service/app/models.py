@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, func
+from sqlalchemy import Boolean, DateTime, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -14,7 +14,7 @@ class NotificationModel(Base):
     order_id: Mapped[str]
     user_id: Mapped[str]
     message: Mapped[str]
-    is_read: Mapped[bool] = mapped_column(default=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

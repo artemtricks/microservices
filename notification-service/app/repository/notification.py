@@ -11,22 +11,27 @@ class NotificationRepository:
     ) -> None:
         self.session_factory = session_factory
 
-    async def get_all(self) -> list[NotificationModel]:
-        async with self.session_factory() as db:
-            result = await db.scalars(select(NotificationModel))
-            return list(result.all())
+    async def get_all(self, db: AsyncSession) -> list[NotificationModel]:
 
-    async def get_one(self, notification_id: str) -> NotificationModel | None:
-        async with self.session_factory() as db:
-            return await db.get(NotificationModel, notification_id)
+        result = await db.scalars(select(NotificationModel))
+        return list(result.all())
 
-    async def create(self, payload: NotificationCreateSchema) -> NotificationModel:
-        async with self.session_factory() as db:
-            new_notification = NotificationModel(
-                order_id=payload.order_id,
-                user_id=payload.user_id,
-                message=payload.message,
-            )
-            db.add(new_notification)
+    async def get_one(
+        self, db: AsyncSession, notification_id: str
+    ) -> NotificationModel | None:
 
-            return new_notification
+        return await db.get(NotificationModel, notification_id)
+
+    async def create(
+        self, db: AsyncSession, payload: NotificationCreateSchema
+    ) -> NotificationModel:
+
+        new_notification = NotificationModel(
+            order_id=payload.order_id,
+            user_id=payload.user_id,
+            message=payload.message,
+        )
+        db.add(new_notification)
+        await db.flush()
+
+        return new_notification

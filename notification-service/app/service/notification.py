@@ -15,46 +15,35 @@ class NotificationService:
     async def get_all(
         self,
     ) -> list[NotificationReadSchema]:
-        notifications_orm = await self.notification_repository.get_all()
-        return [
-            NotificationReadSchema.model_validate(notification)
-            for notification in notifications_orm
-        ]
+        async with self.session_factory() as db:
+            notifications_orm = await self.notification_repository.get_all(db=db)
+            for notification in notifications_orm:
+                if notification.is_read == False:
+                    notification.is_read = True
+            await db.commit()
+            return [
+                NotificationReadSchema.model_validate(notification)
+                for notification in notifications_orm
+            ]
 
     async def get(self, notification_id: str) -> NotificationReadSchema:
-        notification_orm = await self.notification_repository.get_one(notification_id)
-        if not notification_orm:
-            raise HTTPException(404, f"Notification id {notification_id} not found")
+        async with self.session_factory() as db:
+            notification_orm = await self.notification_repository.get_one(
+                db=db, notification_id=notification_id
+            )
+            if not notification_orm:
+                raise HTTPException(404, f"Notification id {notification_id} not found")
+            if notification_orm.is_read == False:
+                notification_orm.is_read = True
+                await db.commit()
 
-        return NotificationReadSchema.model_validate(notification_orm)
+            return NotificationReadSchema.model_validate(notification_orm)
 
     async def create(self, payload: NotificationCreateSchema) -> NotificationReadSchema:
         async with self.session_factory() as db:
             notification_orm = await self.notification_repository.create(
-                payload=payload
+                db=db, payload=payload
             )
             await db.commit()
+            await db.refresh(notification_orm)
             return NotificationReadSchema.model_validate(notification_orm)
-
-    # async def complete_notification(
-    #     self,
-    #     notification: NotificationModel,
-    #     exchange: AbstractExchange,
-    #     amount: int,
-    #     order_id: str,
-    # ) -> NotificationReadSchema:
-    #     await asyncio.sleep(4)
-    #     notification.status = "succeeded"
-
-    #     await self.db.commit()
-
-    #     event = build_notification_succeeded_event(
-    #         notification_id=notification.id, order_id=order_id, amount=amount
-    #     )
-    #     await event_publish_json(
-    #         exchange=exchange,
-    #         routing_key=settings.notification_succeeded_routing_key,
-    #         data=event,
-    #     )
-
-    #     return NotificationReadSchema.model_validate(notification)

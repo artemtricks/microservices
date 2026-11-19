@@ -1,23 +1,25 @@
 from app.clients import CatalogClient, PaymentClient
-from app.config import settings
 from app.database import get_db
 from app.service.order import OrderService
-from fastapi import Depends
-from sqlalchemy.orm import Session
+from fastapi import Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-def get_catalog_client() -> CatalogClient:
-    return CatalogClient(settings.catalog_service_url)
+def get_catalog_client(request: Request) -> CatalogClient:
+    return request.app.state.catalog_client
 
 
-def get_paymnt_client() -> PaymentClient:
-    return PaymentClient(settings.payment_service_url)
+def get_payment_client(request: Request) -> PaymentClient:
+    return request.app.state.payment_client
 
 
 def get_order_service(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     catalog_client: CatalogClient = Depends(get_catalog_client),
-    payment_client: PaymentClient = Depends(get_paymnt_client),
+    payment_client: PaymentClient = Depends(get_payment_client),
 ):
-    """Функция для инъекции зависимости OrderService"""
-    return OrderService(db, catalog_client, payment_client)
+    return OrderService(
+        db,
+        catalog_client,
+        payment_client,
+    )

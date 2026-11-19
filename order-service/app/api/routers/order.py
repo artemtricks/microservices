@@ -7,21 +7,21 @@ router = APIRouter()
 
 
 @router.get("/orders")
-def get_all_orders(
+async def get_all_orders(
     order_service: OrderService = Depends(get_order_service),
 ) -> list[OrderReadSchema]:
-    return order_service.get_all()
+    return await order_service.get_all()
 
 
 @router.get("/order/{order_id}")
-def get_order(
+async def get_order(
     order_id: str, order_service: OrderService = Depends(get_order_service)
 ) -> OrderReadSchema:
-    return order_service.get(order_id)
+    return await order_service.get(order_id)
 
 
 @router.post("/order")
-def create_order(
+async def create_order(
     payload: OrderCreateSchema, order_service: OrderService = Depends(get_order_service)
 ) -> OrderReadSchema:
-    return order_service.create(payload)
+    return await order_service.create(payload)

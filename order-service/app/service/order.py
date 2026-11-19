@@ -1,36 +1,40 @@
 from app.clients import CatalogClient, PaymentClient
-from app.repository.order import CatalogRepository
+from app.messaging import build_order_paid_event
+from app.repository.order import OrderRepository
 from app.schemas import OrderCreateSchema, OrderReadSchema
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class OrderService:
     def __init__(
-        self, db: Session, catalog_client: CatalogClient, payment_client: PaymentClient
+        self,
+        db: AsyncSession,
+        catalog_client: CatalogClient,
+        payment_client: PaymentClient,
     ) -> None:
         self.db = db
-        self.catalog_repository = CatalogRepository(db)
+        self.order_repository = OrderRepository(db)
         self.catalog_client = catalog_client
         self.payment_client = payment_client
 
-    def get_all(self) -> list[OrderReadSchema]:
-        orders_orm = self.catalog_repository.get_all()
+    async def get_all(self) -> list[OrderReadSchema]:
+        orders_orm = await self.order_repository.get_all()
         orders_read = [OrderReadSchema.model_validate(order) for order in orders_orm]
         return orders_read
 
-    def get(self, order_id: str) -> OrderReadSchema:
-        order_orm = self.catalog_repository.get_one(order_id)
+    async def get(self, order_id: str) -> OrderReadSchema:
+        order_orm = await self.order_repository.get_one(order_id)
         if not order_orm:
             raise HTTPException(404, f"Order id {order_id} not found")
 
         return OrderReadSchema.model_validate(order_orm)
 
-    def create(self, payload: OrderCreateSchema) -> OrderReadSchema:
+    async def create(self, payload: OrderCreateSchema) -> OrderReadSchema:
 
         products = []
         for item in payload.items:
-            product = self.catalog_client.get_product(item.product_id)
+            product = await self.catalog_client.get_product(item.product_id)
             products.append(
                 {
                     "product_id": product["id"],
@@ -42,12 +46,26 @@ class OrderService:
         total_amount = sum(
             product["unit_price"] * product["quantity"] for product in products
         )
-        order_orm = self.catalog_repository.create(
+        order_orm = await self.order_repository.create(
             payload=payload, total_amount=total_amount, products=products
         )
-        self.db.commit()
-        self.payment_client.create_payment(
-            order_id=order_orm.id, user_id=order_orm.user_id, amount=total_amount
+        order_id = order_orm.id
+        user_id = order_orm.user_id
+
+        await self.db.commit()
+        await self.payment_client.create_payment(
+            order_id=order_id, user_id=user_id, amount=total_amount
         )
 
         return OrderReadSchema.model_validate(order_orm)
+
+    async def handle_payment_succeeded(self, event: dict):
+        order = await self.order_repository.get_one(event["order_id"])
+        if order is None:
+            raise ValueError("Order not found")
+        if order.status == "paid":
+            return
+        order.status = "paid"
+        await self.db.commit()
+
+        return build_order_paid_event(user_id=order.user_id, order_id=order.id)

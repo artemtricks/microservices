@@ -21,6 +21,7 @@ async def handle_notification_events(
 ):
     async with message.process():
         event = json.loads(message.body.decode("utf-8"))
+        print(f"[RABBITMQ RESP]: {event}")
         if event is not None:
             payload = NotificationCreateSchema(
                 order_id=event["order_id"],
