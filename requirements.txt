@@ -7,3 +7,8 @@ aio-pika
 pydantic-settings
 ruff
 httpx
+email-validator
+pwdlib[argon2]
+PyJWT[crypto]
+
+

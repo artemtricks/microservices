@@ -68,7 +68,18 @@ services:
       notification-db:
         condition: service_healthy
       rabbitmq:
-        condition: service_healthy   
+        condition: service_healthy 
+
+  auth-service:
+    build:
+      context: ../microservices/auth-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://auth:auth@auth-db:5432/auth
+    ports:
+    - "8005:8000"
+    depends_on:
+      auth-db:
+        condition: service_healthy
 
   catalog-db:
     image: postgres:16-alpine
@@ -123,6 +134,20 @@ services:
       - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U notification -d notification"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth"]
       interval: 5s
       timeout: 5s
       retries: 10
