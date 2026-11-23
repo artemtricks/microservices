@@ -1,5 +1,25 @@
 name: orderflow
 services:
+
+  api-gateway:
+    build:
+      context: ../microservices/api-gateway
+    environment:
+      CATALOG_SERVICE_URL: http://catalog-service:8000
+      ORDER_SERVICE_URL: http://order-service:8000
+      AUTH_SERVICE_URL: http://auth-service:8000
+      JWT_SECRET: ${JWT_SECRET:-orderflow-local-jwt-secret-change-me}
+      JWT_ALGORITHM: HS256
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      catalog-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
   catalog-service:
     build:
       context: ../microservices/catalog-service
@@ -75,6 +95,8 @@ services:
       context: ../microservices/auth-service
     environment:
       DATABASE_URL: postgresql+psycopg2://auth:auth@auth-db:5432/auth
+      JWT_SECRET: ${JWT_SECRET:-orderflow-local-jwt-secret-change-me}
+      JWT_ALGORITHM: HS256
     ports:
     - "8005:8000"
     depends_on:

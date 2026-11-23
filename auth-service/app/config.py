@@ -10,4 +10,4 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore

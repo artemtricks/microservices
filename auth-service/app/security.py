@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 import jwt
 from app.config import settings
 from app.models import User
@@ -15,17 +17,18 @@ def veryfy_password(password: str, encoded_password: str):
 
 
 def create_access_token(user: User):
-
+    now = datetime.now(UTC)
+    expires_in = now + timedelta(seconds=3600)
     payload = {
         "user_id": user.id,
         "email": user.email,
         "role": "user",
+        "exp": expires_in,
     }
 
     token = jwt.encode(
-        payload=payload,
+        payload,
         key=settings.jwt_secret.get_secret_value(),
         algorithm=settings.jwt_algorithm,
     )
-
     return token
