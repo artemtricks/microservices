@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     rabbitmq_url: str = "amqp://guest:guest@localhost:5672"
     payment_succeeded_routing_key: str = "payment.succeeded"
     payment_exchange_name: str = "payment.events"
+    kafka_bootstrap_servers: str = "localhost:9092"
+    kafka_analytic_payment_topic: str = "payment-events"
 
 
 settings = Settings()

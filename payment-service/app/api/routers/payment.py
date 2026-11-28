@@ -32,4 +32,5 @@ async def create_payment(
         exchange=request.app.state.payment_exchange,
         amount=payload.amount,
         order_id=payload.order_id,
+        kafka_producer=request.app.state.kafka_producer,
     )

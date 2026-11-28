@@ -1,8 +1,10 @@
 import asyncio
 
 from aio_pika.abc import AbstractExchange
+from aiokafka import AIOKafkaProducer
 from app.config import settings
 from app.events import build_payment_succeeded_event
+from app.kafka import publish_kafka_event
 from app.models import PaymentOrm
 from app.rabbitmq import event_publish_json
 from app.repository.payment import PaymentRepository
@@ -40,6 +42,7 @@ class PaymentService:
         exchange: AbstractExchange,
         amount: int,
         order_id: str,
+        kafka_producer: AIOKafkaProducer,
     ) -> PaymentReadSchema:
         await asyncio.sleep(4)
         payment.status = "succeeded"
@@ -47,12 +50,20 @@ class PaymentService:
         await self.db.commit()
 
         event = build_payment_succeeded_event(
-            payment_id=payment.id, order_id=order_id, amount=amount
+            payment_id=payment.id,
+            order_id=order_id,
+            amount=amount,
         )
         await event_publish_json(
             exchange=exchange,
             routing_key=settings.payment_succeeded_routing_key,
             data=event,
+        )
+
+        await publish_kafka_event(
+            producer=kafka_producer,
+            topic=settings.kafka_analytic_payment_topic,
+            event=event,
         )
 
         return PaymentReadSchema.model_validate(payment)
